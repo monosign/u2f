@@ -1,0 +1,41 @@
+﻿@model LoginModel
+@{
+    ViewData["Title"] = "Home";
+}
+<div class="card-deck mb-3">
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header">
+            <h4 class="my-0 font-weight-normal">Login</h4>
+        <div class="card-body">
+            @using(Html.BeginForm("Login", "Home", FormMethod.Post)){
+            <div class="form-group">
+                <label>UserName</label>
+                @Html.TextBoxFor(x=>x.UserName, new {@class="form-control", placeholder="Type your username"})
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                @Html.PasswordFor(x=>x.Password, new {@class="form-control", placeholder="Type your password"})
+            </div>
+            <button type="submit" class="btn btn-lg btn-block btn-outline-primary">Login</button>
+            }
+        </div>
+    </div>
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header">
+            <h4 class="my-0 font-weight-normal">Register</h4>
+        </div>
+        <div class="card-body">
+            @using(Html.BeginForm("Register", "Home", FormMethod.Post)){
+            <div class="form-group">
+                <label>UserName</label>
+                @Html.TextBoxFor(x=>x.UserName, new {@class="form-control", placeholder="Type your username"})
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                @Html.PasswordFor(x=>x.Password, new {@class="form-control", placeholder="Type your password"})
+            </div>
+            <button type="submit" class="btn btn-lg btn-block btn-primary">Register</button>
+            }
+        </div>
+    </div>
+</div>

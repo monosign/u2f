@@ -1,0 +1,152 @@
+@using Newtonsoft.Json
+@model RegisterDeviceModel
+@{
+    ViewData["Title"] = App.CurrentUser.UserName;
+    var keyHandles = new List<object>();
+    foreach (var registration in App.DeviceRegistrations)
+    {
+        var value = registration.Value.KeyHandle.ToString();
+        keyHandles.Add(new {keyHandle = value, version = "U2F_V2"});
+    }
+    var registeredKeys = JsonConvert.SerializeObject(keyHandles);
+}
+<div class="card shadow-sm">
+    <div class="card-header">
+        <div class="d-flex justify-content-between">
+            <h4 class="my-0 font-weight-normal text-danger">
+                <i class="fa fa-user"></i> @App.CurrentUser.UserName
+            </h4>
+            <div>
+                <a href="#" id="signin_device" class="btn btn-outline-success"><i class="fa fa-lock"></i> Authenticate</a>
+                <a href="#" id="register_device" class="btn btn-primary"><i class="fa fa-save"></i> Register Device</a>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="form-group row">
+            <label class="col-sm-2 col-form-label">App Id</label>
+            <div class="col-sm-10">
+                <span class="form-control-plaintext">@Model.AppId</span>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-sm-2 col-form-label">Challenge</label>
+            <div class="col-sm-10">
+                <span class="form-control-plaintext">@Model.Challenge</span>
+            </div>
+        </div>
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <th>Key Handle</th>
+                <th>Public Key</th>
+                <th>Certificate</th>
+            </tr>
+            </thead>
+            <tbody>
+            @if (App.DeviceRegistrations.Any())
+            {
+                foreach (var registration in App.DeviceRegistrations)
+                {
+                    <tr>
+                        <td>@registration.Value.KeyHandle.ToString().Substring(0, 12)..</td>
+                        <td>@registration.Value.PublicKey.ToString().Substring(0, 12)...</td>
+                        <td>@registration.Value.Certificate.ToString().Substring(0, 40)...</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="3">There is no device</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="modal" tabindex="-1" role="dialog" id="register_modal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fa fa-key"></i> Waiting to tap</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">1. Insert your device</li>
+                <li class="list-group-item">2. If your device already inserted, your device led must be blinking.</li>
+                <li class="list-group-item">3. Tap to key on your device.</li>
+                <li class="list-group-item text-center"> <i class="fa fa-sync fa-spin"></i> Waiting...</li>
+            </ul>
+            @using (Html.BeginForm("RegisterDevice", "Home", FormMethod.Post, new {id = "register_form"}))
+            {
+                @Html.HiddenFor(x => x.AppId)
+                @Html.HiddenFor(x => x.Challenge)
+                @Html.HiddenFor(x => x.RawRegisterResponse)
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script type="text/javascript">
+        $("#register_device").on("click",
+            function() {
+                var request = { "challenge": "@Model.Challenge", "version": "U2F_V2", "appId": "@Model.AppId" };
+                var registeredKeys = @Html.Raw(registeredKeys);
+                u2f.register("@Model.AppId",
+                    [request],
+                    registeredKeys,
+                    function(data) {
+                        console.log("Register callback", data);
+                        if (data.errorCode) {
+                            onError(data.errorCode, true);
+                            $("#register_modal").modal("hide");
+                        } else {
+                            var json = JSON.stringify(data);
+                            $("#@Html.IdFor(x => x.RawRegisterResponse)").val(json);
+                            $("#register_modal").modal("hide");
+                            $('#register_form').submit();
+                        }
+                    });
+
+                $("#register_modal").modal();
+            });
+
+        function onError(code, enrolling) {
+            switch (code) {
+            case u2f.ErrorCodes.OTHER_ERROR:
+                showError('sign error (other)');
+                break;
+            case u2f.ErrorCodes.BAD_REQUEST:
+                showError('bad request');
+                break;
+            case u2f.ErrorCodes.CONFIGURATION_UNSUPPORTED:
+                showError('configuration unsupported');
+                break;
+            case u2f.ErrorCodes.DEVICE_INELIGIBLE:
+                if (enrolling)
+                    showError('U2F token is already registered');
+                else
+                    showError('U2F token is not registered');
+                break;
+            case u2f.ErrorCodes.TIMEOUT:
+                showError('timeout');
+                break;
+            default:
+                showError('unknown error code=' + code);
+                break;
+            }
+        }
+
+        function showError(message) {
+            var element = $("<div class='alert alert-danger'></div>");
+            element.append($('<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'));
+            element.append(message);
+            $("#messages").append(element);
+        }
+    </script>
+}
