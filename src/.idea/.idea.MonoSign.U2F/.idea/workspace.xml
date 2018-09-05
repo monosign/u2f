@@ -2,12 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ea581a89-38a4-40f1-ba84-2a2249e13d20" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/MonoSign.U2F.Demo/Models/AuthenticateDeviceModel.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/MonoSign.U2F.Demo/wwwroot/js/u2f-app.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.MonoSign.U2F/.idea/contentModel.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.MonoSign.U2F/.idea/contentModel.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.MonoSign.U2F/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.MonoSign.U2F/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MonoSign.U2F.Demo/Controllers/HomeController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MonoSign.U2F.Demo/Controllers/HomeController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MonoSign.U2F.Demo/Views/Home/CurrentUser.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/MonoSign.U2F.Demo/Views/Home/CurrentUser.cshtml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MonoSign.U2F.Demo/wwwroot/js/u2f-app.js" beforeDir="false" afterPath="$PROJECT_DIR$/MonoSign.U2F.Demo/wwwroot/js/u2f-app.js" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -47,13 +42,13 @@
         <counts>
           <entry key="cs" value="3047" />
           <entry key="cshtml" value="5781" />
-          <entry key="js" value="843" />
+          <entry key="js" value="846" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="C#" value="3047" />
-          <entry key="JavaScript" value="843" />
+          <entry key="JavaScript" value="846" />
           <entry key="Razor" value="5781" />
         </counts>
       </usages-collector>
@@ -112,8 +107,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/MonoSign.U2F.Demo/Views/Home/CurrentUser.cshtml">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="389">
-              <caret line="95" column="81" selection-start-line="95" selection-start-column="65" selection-end-line="95" selection-end-column="81" />
+            <state relative-caret-position="533">
+              <caret line="103" column="29" selection-start-line="103" selection-start-column="29" selection-end-line="103" selection-end-column="29" />
               <folding>
                 <marker date="1536151011474" expanded="true" signature="47:101" ph="@..." />
                 <marker date="1536151011474" expanded="true" signature="102:2343" ph="&lt;div.../&gt;" />
@@ -159,8 +154,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/MonoSign.U2F.Demo/wwwroot/js/u2f-app.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="189">
-              <caret line="161" column="56" selection-start-line="161" selection-start-column="56" selection-end-line="161" selection-end-column="56" />
+            <state relative-caret-position="447">
+              <caret line="213" column="43" lean-forward="true" selection-start-line="213" selection-start-column="43" selection-end-line="213" selection-end-column="43" />
               <folding>
                 <element signature="e#101#108#1" expanded="true" />
               </folding>
@@ -199,6 +194,7 @@
       <find>AppId</find>
       <find>Url</find>
       <find>authenticate_modal</find>
+      <find>onError</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -436,12 +432,12 @@
       <option name="presentableId" value="Default" />
       <updated>1536061890703</updated>
       <workItem from="1536061892987" duration="16625000" />
-      <workItem from="1536133051619" duration="11841000" />
+      <workItem from="1536133051619" duration="12866000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="28466000" />
+    <option name="totallyTimeSpent" value="29491000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -1000,8 +996,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/MonoSign.U2F.Demo/Views/Home/CurrentUser.cshtml">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="389">
-          <caret line="95" column="81" selection-start-line="95" selection-start-column="65" selection-end-line="95" selection-end-column="81" />
+        <state relative-caret-position="533">
+          <caret line="103" column="29" selection-start-line="103" selection-start-column="29" selection-end-line="103" selection-end-column="29" />
           <folding>
             <marker date="1536151011474" expanded="true" signature="47:101" ph="@..." />
             <marker date="1536151011474" expanded="true" signature="102:2343" ph="&lt;div.../&gt;" />
@@ -1045,8 +1041,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/MonoSign.U2F.Demo/wwwroot/js/u2f-app.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="189">
-          <caret line="161" column="56" selection-start-line="161" selection-start-column="56" selection-end-line="161" selection-end-column="56" />
+        <state relative-caret-position="447">
+          <caret line="213" column="43" lean-forward="true" selection-start-line="213" selection-start-column="43" selection-end-line="213" selection-end-column="43" />
           <folding>
             <element signature="e#101#108#1" expanded="true" />
           </folding>

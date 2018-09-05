@@ -212,7 +212,7 @@ function checkResult(result) {
         setTimeout(function () {
                 location.href = result.redirect;
             },
-            1000);
+            1500);
     }
 
     return true;

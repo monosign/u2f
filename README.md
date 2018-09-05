@@ -20,6 +20,10 @@ Demo project is just testing purpose. Do not use it on production.
 - Device Duplication Check
 - Device Name Duplication Check
 
+### What about Nuget Packages?
+
+Nuget packages will be ready soon and automated for next updates.
+
 ### Screenshots
 
 #### Main
@@ -32,6 +36,10 @@ Demo project is just testing purpose. Do not use it on production.
 ![Registered](docs/img/registered-device.png "Registered")
 #### Already Registered
 ![Already Registered](docs/img/already-registered-device.png "Already Registered")
+#### Authenticate
+![Authenticate](docs/img/authenticate-screen.png "Authenticate")
+#### Already Registered
+![Authenticate Completed](docs/img/authenticate-completed-screen.png "Authenticate Completed")
 
 
 ### FIDO Universal 2nd Factor (U2F) for C# .NET
