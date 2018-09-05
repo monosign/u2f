@@ -10,5 +10,10 @@ namespace MonoSign.U2F.Demo
         public DateTime CreatedDate { get; set; }
 
         public List<Device> Devices { get; set; }
+
+        public User()
+        {
+            Devices = new List<Device>();
+        }
     }
 }

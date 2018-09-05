@@ -85,7 +85,6 @@
           <e p="Home" t="Include">
             <e p="CurrentUser.cshtml" t="Include" />
             <e p="Index.cshtml" t="Include" />
-            <e p="RegisterDevice.cshtml" t="Include" />
           </e>
           <e p="Shared" t="Include">
             <e p="_CookieConsentPartial.cshtml" t="Include" />

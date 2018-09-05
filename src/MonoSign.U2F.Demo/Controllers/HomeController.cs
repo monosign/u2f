@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Internal;
 using MonoSign.U2F.Demo.Models;
 
 namespace MonoSign.U2F.Demo.Controllers
@@ -64,12 +65,22 @@ namespace MonoSign.U2F.Demo.Controllers
         }
 
         [HttpPost]
+        public IActionResult RegisterDeviceRequest()
+        {
+            if (App.CurrentUser == null)
+            {
+                return BadRequest(new {error = "You must login.", code = 401});
+            }
+
+            return Ok(GetRegistrationModel());
+        }
+
+        [HttpPost]
         public IActionResult RegisterDevice(RegisterDeviceModel model)
         {
             if (model == null || string.IsNullOrEmpty(model.AppId) || string.IsNullOrEmpty(model.Challenge) || string.IsNullOrEmpty(model.RawRegisterResponse))
             {
-                ViewBag.Error = "Invalid Data";
-                return View("CurrentUser", GetRegistrationModel());
+                return BadRequest(new {error = "Invalid Data", code = 400});
             }
 
             try
@@ -80,8 +91,7 @@ namespace MonoSign.U2F.Demo.Controllers
 
                 if (startedRegistration == null)
                 {
-                    ViewBag.Error = "Invalid Started Registration.";
-                    return View("CurrentUser", GetRegistrationModel());
+                    return BadRequest(new {error = "Invalid Started Registration.", code = 400});
                 }
 
                 var facetIds = new List<FidoFacetId> {new FidoFacetId(startedRegistration.AppId.ToString())};
@@ -89,24 +99,42 @@ namespace MonoSign.U2F.Demo.Controllers
 
                 if (deviceRegistration == null)
                 {
-                    ViewBag.Error = "Invalid Device Registration.";
-                    return View("CurrentUser", GetRegistrationModel());
+                    return BadRequest(new {error = "Invalid Device Registration.", code = 400});
                 }
-                
-                App.AddDeviceRegistration(App.CurrentUser.UserName, deviceRegistration);
+
+                App.AddDeviceRegistration(model.DeviceName, deviceRegistration);
                 App.Registrations.Remove(model.Challenge);
 
-                ViewBag.Message = "Device has been registered.";
-
-                return View("CurrentUser", GetRegistrationModel());
+                return Ok(new {message = "Device has been registered.", code = 200, redirect = Url.Action("CurrentUser")});
             }
             catch (Exception exception)
             {
                 Console.WriteLine(exception);
-                ViewBag.Error = exception.Message;
+                return BadRequest(new {error = exception.Message, code = 500});
+            }
+        }
+        
+        [HttpPost]
+        public IActionResult RemoveDevice(Device value)
+        {
+            if (App.CurrentUser == null)
+            {
+                return BadRequest(new {error = "You must login.", code = 401});
             }
 
-            return View("CurrentUser", GetRegistrationModel());
+            if (value == null || string.IsNullOrEmpty(value.Identifier))
+            {
+                return BadRequest(new {error = "You must send device identifier.", code = 401});
+            }
+            
+            var device = App.CurrentUser.Devices.FirstOrDefault(x => x.Identifier.Equals(value.Identifier));
+
+            if (device != null)
+            {
+                App.CurrentUser.Devices.Remove(device);
+            }
+
+            return Ok(new {message = "Device has been removed.", code = 200, redirect = Url.Action("CurrentUser")});
         }
 
         public IActionResult CurrentUser()
@@ -116,7 +144,7 @@ namespace MonoSign.U2F.Demo.Controllers
                 return RedirectToAction("Index");
             }
 
-            return View(GetRegistrationModel());
+            return View();
         }
 
         public RegisterDeviceModel GetRegistrationModel()
@@ -130,6 +158,9 @@ namespace MonoSign.U2F.Demo.Controllers
                 AppId = startedRegistration.AppId.ToString(),
                 Challenge = startedRegistration.Challenge
             };
+
+            if (App.CurrentUser.Devices.Any())
+                model.RegisteredKeys.AddRange(App.CurrentUser.Devices.Select(x => x.Identifier).ToList());
 
             App.AddRegistration(model.Challenge, startedRegistration);
             return model;
