@@ -142,6 +142,11 @@
                                             success: function(result) {
                                                 checkResult(result);
                                             },
+                                            error : function(result) {
+                                                if (result.responseJSON) {
+                                                    checkResult(result.responseJSON);
+                                                }
+                                            },
                                             complete: function() {
                                                 $("#register_modal").modal("hide");
                                             }

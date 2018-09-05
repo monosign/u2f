@@ -85,6 +85,13 @@ namespace MonoSign.U2F.Demo.Controllers
 
             try
             {
+                var device = App.CurrentUser.Devices.FirstOrDefault(x => x.Name.Equals(model.DeviceName));
+
+                if (device != null)
+                {
+                    return BadRequest(new {error = "This name already used on another device.", code = 400});
+                }
+
                 var u2F = new FidoUniversalTwoFactor();
 
                 App.Registrations.TryGetValue(model.Challenge, out var startedRegistration);
@@ -113,7 +120,7 @@ namespace MonoSign.U2F.Demo.Controllers
                 return BadRequest(new {error = exception.Message, code = 500});
             }
         }
-        
+
         [HttpPost]
         public IActionResult RemoveDevice(Device value)
         {
@@ -126,7 +133,7 @@ namespace MonoSign.U2F.Demo.Controllers
             {
                 return BadRequest(new {error = "You must send device identifier.", code = 401});
             }
-            
+
             var device = App.CurrentUser.Devices.FirstOrDefault(x => x.Identifier.Equals(value.Identifier));
 
             if (device != null)
