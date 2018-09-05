@@ -10,7 +10,6 @@
                 <i class="fa fa-user"></i> @App.CurrentUser.UserName
             </h4>
             <div>
-                <a href="#" id="signin_device" class="btn btn-outline-success"><i class="fa fa-lock"></i> Authenticate</a>
                 <a href="#" id="register_device" class="btn btn-primary"><i class="fa fa-save"></i> Register Device</a>
             </div>
         </div>
@@ -23,8 +22,7 @@
                 <th>Name</th>
                 <th>Usage</th>
                 <th>Key Handle</th>
-                <th>Public Key</th>
-                <th>Certificate</th>
+                <th>Authenticate</th>
             </tr>
             </thead>
             <tbody>
@@ -32,7 +30,6 @@
             {
                 foreach (var registration in App.CurrentUser.Devices)
                 {
-                    var device = FidoDeviceRegistration.FromJson(registration.Data);
                     <tr>
                         <td>
                             <a href="#" data-js="remove-device" data-id="@registration.Identifier">
@@ -40,17 +37,22 @@
                             </a>
                         </td>
                         <td>@registration.Name</td>
-                        <td>@registration.Usage</td>
-                        <td>@device.KeyHandle.ToString().Substring(0, 12)..</td>
-                        <td>@device.PublicKey.ToString().Substring(0, 12)...</td>
-                        <td>@device.Certificate.ToString().Substring(0, 40)...</td>
+                        <td>@registration.Usage</td>                                                              
+                        <td>
+                            <span title="@registration.Identifier" style="display: inline-block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;">
+                                @registration.Identifier
+                            </span>
+                        </td>
+                        <td>
+                            <a href="#" data-js="authenticate-device" class="btn btn-sm btn-outline-success" data-name="@registration.Name" data-id="@registration.Identifier"><i class="fa fa-lock"></i> Authenticate</a>
+                        </td>
                     </tr>
                 }
             }
             else
             {
                 <tr>
-                    <td colspan="5">There is no device</td>
+                    <td colspan="6">There is no device</td>
                 </tr>
             }
             </tbody>
@@ -80,179 +82,24 @@
         </div>
     </div>
 </div>
+             
+<div class="modal" tabindex="-1" role="dialog" id="authenticate_modal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fa fa-key"></i> Waiting to tap</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Please tap/touch your device named as "<span id="user_device_name"></span>".
+            </div>
+        </div>
+    </div>
+</div>
 
 @section Scripts
 {
-    <script type="text/javascript">
-        // We will keep this state for closed modal if someone close it before register and then tap the key.
-        var waitingResponse = false;
-        $("#register_device").on("click",
-            function(event) {
-                event.preventDefault();
-                $.ajax({
-                    url: 'RegisterDeviceRequest',
-                    method: 'POST',
-                    success: function(result) {
-
-                        if (!result || result.error) {
-                            showMessage(result.error, 3);
-                            return;
-                        }
-
-                        var request = { "challenge": result.challenge, "version": "U2F_V2", "appId": result.appId };
-                        var registeredKeys = [];
-
-                        if (result.registeredKeys) {
-                            $.each(result.registeredKeys,
-                                function() {
-                                    registeredKeys.push({ keyHandle: this, version: "U2F_V2" });
-                                });
-                        }
-
-                        $("#device_name").val('');
-                        waitingResponse = true;
-                        try {
-                            u2f.register(result.appId,
-                                [request],
-                                registeredKeys,
-                                function(data) {
-                                    if (!waitingResponse)
-                                        return;
-
-                                    waitingResponse = false;
-                                    console.log("Register callback", data);
-                                    if (data.errorCode) {
-                                        onError(data.errorCode, true);
-                                        $("#register_modal").modal("hide");
-                                    } else {
-                                        var json = JSON.stringify(data);
-
-                                        var req = {
-                                            appId: result.appId,
-                                            challenge: result.challenge,
-                                            rawRegisterResponse: json,
-                                            deviceName: $("#device_name").val()
-                                        };
-
-                                        $.ajax({
-                                            url: 'RegisterDevice',
-                                            method: 'POST',
-                                            data: req,
-                                            json: true,
-                                            success: function(result) {
-                                                checkResult(result);
-                                            },
-                                            error : function(result) {
-                                                if (result.responseJSON) {
-                                                    checkResult(result.responseJSON);
-                                                }
-                                            },
-                                            complete: function() {
-                                                $("#register_modal").modal("hide");
-                                            }
-                                        });
-                                    }
-                                });
-
-                            $("#register_modal").modal();
-                        } catch (e) {
-                            console.error(e);
-                            waitingResponse = false;
-                        }
-                    }
-                });
-            });
-
-        $('#register_modal').on('hidden.bs.modal',
-            function(e) {
-                waitingResponse = false;
-            });
-
-        $("[data-js='remove-device']").on("click",
-            function(event) {
-                event.preventDefault();
-                var identifier = $(this).data("id");
-
-                $.ajax({
-                    url: 'RemoveDevice',
-                    method: 'POST',
-                    data: {
-                        identifier
-                    },
-                    json: true,
-                    success: function(result) {
-                        checkResult(result);
-                    },
-                    complete: function() {
-                        $("#register_modal").modal("hide");
-                    }
-                });
-            });
-
-        function checkResult(result) {
-            if (!result) {
-                showMessage("No return value from server.", 3);
-                return false;
-            }
-            if (result.error) {
-                showMessage(result.error, 3);
-                return false;
-            }
-
-            if (result.message) {
-                showMessage(result.message, 1);
-            }
-
-            if (result.redirect) {
-                // Waiting for 1 sec to show success message then redirect.
-                setTimeout(function() {
-                        location.href = result.redirect;
-                    },
-                    1000);
-            }
-
-            return true;
-        }
-
-        function onError(code, enrolling) {
-            switch (code) {
-            case u2f.ErrorCodes.OTHER_ERROR:
-                showMessage('sign error (other)', 2);
-                break;
-            case u2f.ErrorCodes.BAD_REQUEST:
-                showMessage('bad request', 2);
-                break;
-            case u2f.ErrorCodes.CONFIGURATION_UNSUPPORTED:
-                showMessage('configuration unsupported', 3);
-                break;
-            case u2f.ErrorCodes.DEVICE_INELIGIBLE:
-                if (enrolling)
-                    showMessage('U2F token is already registered', 2);
-                else
-                    showMessage('U2F token is not registered', 3);
-                break;
-            case u2f.ErrorCodes.TIMEOUT:
-                showMessage('timeout', 2);
-                break;
-            default:
-                showMessage('unknown error code=' + code, 3);
-                break;
-            }
-        }
-
-        function showMessage(message, type) {
-            var cssClass = 'alert-info';
-            if (type === 1) {
-                cssClass = "alert-success";
-            } else if (type === 2) {
-                cssClass = "alert-warning";
-            } else if (type === 3) {
-                cssClass = "alert-danger";
-            }
-            var element = $("<div class='alert " + cssClass + "'></div>");
-            element.append($('<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'));
-            element.append(message);
-            $("#messages").append(element);
-        }
-    </script>
+    <script src="~/js/u2f-app.js"></script>
 }

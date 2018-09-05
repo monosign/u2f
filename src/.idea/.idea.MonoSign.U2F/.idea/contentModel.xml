@@ -60,6 +60,7 @@
           <e p="HomeController.cs" t="Include" />
         </e>
         <e p="Models" t="Include">
+          <e p="AuthenticateDeviceModel.cs" t="Include" />
           <e p="Device.cs" t="Include" />
           <e p="ErrorViewModel.cs" t="Include" />
           <e p="LoginModel.cs" t="Include" />
@@ -101,6 +102,7 @@
           <e p="js" t="Include">
             <e p="site.js" t="Include" />
             <e p="u2f-api.js" t="Include" />
+            <e p="u2f-app.js" t="Include" />
           </e>
           <e p="lib" t="Include">
             <e p="bootstrap-v4" t="Include">

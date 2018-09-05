@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.EntityFrameworkCore.Internal;
 using MonoSign.U2F.Demo.Models;
 
@@ -11,6 +12,15 @@ namespace MonoSign.U2F.Demo.Controllers
 {
     public class HomeController : Controller
     {
+        private FidoAppId AppId { get; set; }
+
+        public override void OnActionExecuting(ActionExecutingContext context)
+        {
+            AppId = new FidoAppId(string.Format("{0}://{1}", Request.Scheme, Request.Host));
+            
+            base.OnActionExecuting(context);
+        }
+
         public IActionResult Index()
         {
             return View();
@@ -122,6 +132,62 @@ namespace MonoSign.U2F.Demo.Controllers
         }
 
         [HttpPost]
+        public IActionResult AuthenticateDeviceRequest(AuthenticateDeviceModel model)
+        {
+            if (App.CurrentUser == null)
+            {
+                return BadRequest(new {error = "You must login.", code = 401});
+            }
+
+            if (model == null || string.IsNullOrEmpty(model.KeyHandle))
+                return BadRequest(new {error = "Invalid device id.", code = 401});
+
+            var device = App.CurrentUser.Devices.FirstOrDefault(x => x.Identifier.Equals(model.KeyHandle));
+
+            if (device == null)
+                return BadRequest(new {error = "Device not found.", code = 401});
+
+            return Ok(GetAuthenticationModel(device));
+        }
+
+        [HttpPost]
+        public IActionResult AuthenticateDevice(AuthenticateDeviceModel model)
+        {
+            if (App.CurrentUser == null)
+            {
+                return BadRequest(new {error = "You must login.", code = 401});
+            }
+
+            if (model == null || string.IsNullOrEmpty(model.KeyHandle))
+                return BadRequest(new {error = "Invalid device id.", code = 400});
+
+            var device = App.CurrentUser.Devices.FirstOrDefault(x => x.Identifier.Equals(model.KeyHandle));
+
+            if (device == null)
+                return BadRequest(new {error = "Device not found.", code = 400});
+
+
+            var u2F = new FidoUniversalTwoFactor();
+
+            var deviceRegistration = FidoDeviceRegistration.FromJson(device.Data);
+            if (deviceRegistration == null)
+            {
+                return BadRequest(new {error = "Unknown key handle.", code = 400});
+            }
+
+            var challenge = model.Challenge;
+
+            var startedAuthentication = new FidoStartedAuthentication(AppId, challenge, FidoKeyHandle.FromWebSafeBase64(model.KeyHandle ?? ""));
+            var facetIds = new List<FidoFacetId> {new FidoFacetId(AppId.ToString())};
+
+            var counter = u2F.FinishAuthentication(startedAuthentication, model.RawAuthenticateResponse, deviceRegistration, facetIds);
+            deviceRegistration.Counter = counter;
+            device.Usage++;
+
+            return Ok(new {message = "Device has been authenticated.", code = 200, redirect = Url.Action("CurrentUser")});
+        }
+
+        [HttpPost]
         public IActionResult RemoveDevice(Device value)
         {
             if (App.CurrentUser == null)
@@ -154,11 +220,26 @@ namespace MonoSign.U2F.Demo.Controllers
             return View();
         }
 
+        public AuthenticateDeviceModel GetAuthenticationModel(Device device)
+        {
+            var u2F = new FidoUniversalTwoFactor();
+            var deviceRegistration = FidoDeviceRegistration.FromJson(device.Data);
+            var authentication = u2F.StartAuthentication(AppId, deviceRegistration);
+
+            var model = new AuthenticateDeviceModel
+            {
+                AppId = authentication.AppId.ToString(),
+                Challenge = authentication.Challenge,
+                KeyHandle = device.Identifier
+            };
+
+            return model;
+        }
+
         public RegisterDeviceModel GetRegistrationModel()
         {
             var u2F = new FidoUniversalTwoFactor();
-            var url = new FidoAppId(string.Format("{0}://{1}", Request.Scheme, Request.Host));
-            var startedRegistration = u2F.StartRegistration(url);
+            var startedRegistration = u2F.StartRegistration(AppId);
 
             var model = new RegisterDeviceModel
             {
