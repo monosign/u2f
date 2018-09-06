@@ -22,7 +22,13 @@ Demo project is just testing purpose. Do not use it on production.
 
 ### What about Nuget Packages?
 
-Nuget packages will be ready soon and automated for next updates.
+You can find the package on nuget;
+
+[![NuGet](https://img.shields.io/nuget/v/MonoSign.U2F.svg)](https://www.nuget.org/packages/MonoSign.U2F/)
+
+```sh
+dotnet add package MonoSign.U2F
+```
 
 ### Screenshots
 

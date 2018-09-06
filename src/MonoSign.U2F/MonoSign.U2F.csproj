@@ -1,16 +1,31 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="BouncyCastle.NetCore">
-      <Version>1.8.2</Version>
-    </PackageReference>
-    <PackageReference Include="Newtonsoft.Json">
-      <Version>11.0.2</Version>
-    </PackageReference>
-  </ItemGroup>
+    <PropertyGroup>
+        <Version>1.0.1</Version>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Authors>monosign,monofor</Authors>
+        <Title>MonoSign U2F</Title>
+        <Description>MonoSign U2F/FIDO Client Library</Description>
+        <Company>MonoFor, Inc.</Company>
+        <Copyright>2018, MonoFor, Inc.</Copyright>
+        <RepositoryType>git</RepositoryType>
+        <RepositoryUrl>https://github.com/monosign/u2f.git</RepositoryUrl>
+    </PropertyGroup>
+    <PropertyGroup>
+        <PackageId>MonoSign.U2F</PackageId>
+        <PackageIconUrl>https://avatars0.githubusercontent.com/u/35993114?s=200</PackageIconUrl>
+        <PackageTags>u2f fido securitykey yubikey mfa 2fa 2sv pki publickey pgp</PackageTags>
+        <PackageProjectUrl>https://github.com/monosign/u2f</PackageProjectUrl>
+        <ProjectOwners>monosign, monofor</ProjectOwners>
+        <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="BouncyCastle.NetCore">
+            <Version>1.8.2</Version>
+        </PackageReference>
+        <PackageReference Include="Newtonsoft.Json">
+            <Version>11.0.2</Version>
+        </PackageReference>
+    </ItemGroup>
 
 </Project>
